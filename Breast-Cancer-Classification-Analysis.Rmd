@@ -1,0 +1,338 @@
+---
+title: "Final Project Analysis"
+output: html_notebook
+---
+
+
+```{r}
+
+#Import packages
+library(tidyverse)
+library(broom)
+
+#Read in data
+data <- read_csv("dataR2.csv")
+
+#Classify 2 as TRUE for breast cancer patients
+data$Classification=data$Classification=="2"
+
+#Export data
+write.csv(data, "dataStats242Final.csv")
+
+```
+
+
+```{r}
+
+#Prevalence of breast cancer in dataset
+nrow(data)
+sum(data$Classification == 0)
+sum(data$Classification == 1)
+sum(data$Classification == 1)/nrow(data)
+
+```
+
+```{r}
+
+#Boxplots for Predictor Variables
+boxplot <- data %>% ggplot(aes(x = Classification, y = Age, group = Classification, color = Classification)) + geom_boxplot() + theme_bw() +
+  labs(title="Age by Breast Cancer Classification", x="Breast Cancer",
+       y="Age", color="Breast Cancer Classification")
+boxplot
+
+```
+
+
+```{r}
+
+#Boxplots for Predictor Variables
+boxplot <- data %>% ggplot(aes(x = Classification, y = BMI, group = Classification, color = Classification)) + geom_boxplot() + theme_bw() +
+  labs(title="BMI by Breast Cancer Classification", x="Breast Cancer",
+       y="BMI", color="Breast Cancer Classification")
+boxplot
+
+```
+
+
+```{r}
+
+#Boxplots for Predictor Variables
+boxplot <- data %>% ggplot(aes(x = Classification, y = Glucose, group = Classification, color = Classification)) + geom_boxplot() + theme_bw() +
+  labs(title="Glucose by Breast Cancer Classification", x="Breast Cancer",
+       y="Glucose", color="Breast Cancer Classification")
+boxplot
+
+```
+
+
+
+
+
+```{r}
+
+#Boxplots for Predictor Variables
+boxplot <- data %>% ggplot(aes(x = Classification, y = Insulin, group = Classification, color = Classification)) + geom_boxplot() + theme_bw() +
+  labs(title="Insulin by Breast Cancer Classification", x="Breast Cancer",
+       y="Insulin", color="Breast Cancer Classification")
+boxplot
+
+```
+
+
+```{r}
+
+#Boxplots for Predictor Variables
+boxplot <- data %>% ggplot(aes(x = Classification, y = HOMA, group = Classification, color = Classification)) + geom_boxplot() + theme_bw() +
+  labs(title="HOMA by Breast Cancer Classification", x="Breast Cancer",
+       y="HOMA", color="Breast Cancer Classification")
+boxplot
+
+```
+
+
+
+```{r}
+
+#Boxplots for Predictor Variables
+boxplot <- data %>% ggplot(aes(x = Classification, y = Leptin, group = Classification, color = Classification)) + geom_boxplot() + theme_bw() +
+  labs(title="Leptin by Breast Cancer Classification", x="Breast Cancer",
+       y="Leptin", color="Breast Cancer Classification")
+boxplot
+
+```
+
+
+```{r}
+
+#Boxplots for Predictor Variables
+boxplot <- data %>% ggplot(aes(x = Classification, y = Adiponectin, group = Classification, color = Classification)) + geom_boxplot() + theme_bw() +
+  labs(title="Adiponectin by Breast Cancer Classification", x="Breast Cancer",
+       y="Adiponectin", color="Breast Cancer Classification")
+boxplot
+
+```
+
+
+```{r}
+
+#Boxplots for Predictor Variables
+boxplot <- data %>% ggplot(aes(x = Classification, y = Resistin, group = Classification, color = Classification)) + geom_boxplot() + theme_bw() +
+  labs(title="Resistin by Breast Cancer Classification", x="breast Cancer",
+       y="Resistin", color="Breast Cancer Classification")
+boxplot
+
+```
+
+
+```{r}
+
+#Boxplots for Predictor Variables
+boxplot <- data %>% ggplot(aes(x = Classification, y = MCP.1, group = Classification, color = Classification)) + geom_boxplot() + theme_bw() +
+  labs(title="MCP1 by Breast Cancer Classification", x="breast Cancer",
+       y="MCP1", color="Breast Cancer Classification")
+boxplot
+
+```
+```{r}
+
+#Single variable logistic regression
+fit.age <- glm(Classification ~ Age, data = data)
+summary(fit.age)
+
+
+```
+
+
+```{r}
+
+#Single variable logistic regression
+fit.BMI <- glm(Classification ~ BMI, data = data)
+summary(fit.BMI)
+
+
+```
+
+
+```{r}
+
+#Single variable logistic regression
+fit.glucose <- glm(Classification ~ Glucose, data = data)
+summary(fit.glucose)
+
+
+```
+
+```{r}
+
+#Single variable logistic regression
+fit.insulin <- glm(Classification ~ Insulin, data = data)
+summary(fit.insulin)
+
+
+```
+
+```{r}
+
+#Single variable logistic regression
+fit.HOMA <- glm(Classification ~ HOMA, data = data)
+summary(fit.HOMA)
+
+
+```
+
+
+```{r}
+
+#Single variable logistic regression
+fit.leptin <- glm(Classification ~ Leptin, data = data)
+summary(fit.leptin)
+
+
+```
+
+
+```{r}
+
+#Single variable logistic regression
+fit.Adiponectin <- glm(Classification ~ Adiponectin, data = data)
+summary(fit.Adiponectin)
+
+
+```
+
+```{r}
+
+#Single variable logistic regression
+fit.resistin <- glm(Classification ~ Resistin, data = data)
+summary(fit.resistin)
+
+
+```
+
+```{r}
+
+#Single variable logistic regression
+fit.MCP1 <- glm(Classification ~ MCP.1, data = data)
+summary(fit.MCP1)
+
+
+```
+
+
+
+
+```{r}
+
+## 1. Split dataset into a training and a test set using a 60-40 split
+set.seed(16)
+train <- data %>% sample_frac(0.7)
+test <- data %>% setdiff(train)
+
+```
+
+
+```{r}
+
+#Find best model using best subsets method
+library(leaps)
+
+subsets <- regsubsets(Classification ~ ., data = train, nbest = 1)
+subsets.sum <- summary(subsets)
+names(subsets.sum)
+
+```
+
+
+```{r}
+
+d <- data.frame(cbind(subsets.sum$which, BIC = subsets.sum$bic))
+d
+
+
+```
+
+
+```{r}
+
+numTerms <- which.min(d$BIC)
+numTerms
+
+```
+
+
+```{r}
+
+coef(subsets, numTerms)
+
+
+```
+
+```{r}
+
+#Final model
+final.fit <- glm(Classification ~ BMI + Glucose + Insulin + HOMA + Resistin, data = train)
+summary(final.fit)
+
+```
+
+```{r}
+
+#Calculate c-index
+library(Hmisc)
+phat <- predict(final.fit, test, type = "resp")
+rcorr.cens(S = test$Classification, x = phat)[["C Index"]]
+
+```
+
+
+
+```{r}
+
+#Calculate sensitivity and specificity
+sensspec <- function(c, obsY, phat)
+{
+  predY <- (phat>=c)
+  tab <- table(predY, obsY)
+  sens <- mean(predY[obsY==1]) ## sensitivity, true positive
+  spec <- mean((1-predY)[obsY==0]) ## specificity, true negative
+  return(list(tab = tab, stats = c(sens=sens,spec=spec)))
+}
+
+
+sensspec(0.5, obsY = test$Classification, phat = predict(final.fit,test, type = "resp"))
+
+```
+
+
+```{r}
+
+sensspec(0.49, obsY = test$Classification, phat = predict(final.fit,test, type = "resp"))
+
+```
+
+```{r}
+
+#ROC Curve
+calcSensSpec <- function(c, phat, Yobs)
+{
+  Ynew <- ifelse(phat >= c, 1, 0)
+  sens <- mean(Ynew[Yobs==1]) ## true positive
+  spec <- 1-mean(Ynew[Yobs==0]) ## true negative
+  return(c(sens=sens, spec=spec))
+}
+
+plotROC <- function(fit, Y, mytitle = "ROC Curve")
+{
+  cvec <- seq(0,1,0.001)
+  sensSpecVec <- sapply(cvec, calcSensSpec, predict(final.fit, test, type = "resp"), Y)
+  plot(1-sensSpecVec["spec",], sensSpecVec["sens",],
+       ylab = "Sensitivity", xlab = "1-Specificity",
+       main = mytitle)
+}
+
+
+plotROC(fit = final.fit, Y = test$Classification, mytitle = "ROC Curve for Breast Cancer Model")
+
+```
+
+
